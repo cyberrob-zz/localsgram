@@ -3,6 +3,29 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
+
     </style>
+
+    <style name="LocalsgramActionBarTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:actionBarStyle">@style/LocalsgramActionBar</item>
+        <item name="android:popupMenuStyle">@style/PopupMenu.Actionbar_localsgram</item>
+        <item name="android:actionDropDownStyle">@style/PopupMenu.Actionbar_localsgram</item>
+    </style>
+
+    <style name="LocalsgramActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">
+        <item name="android:background">#785448</item>
+        <item name="android:displayOptions">showTitle</item>
+        <item name="displayOptions">showTitle</item>
+        <item name="android:icon">@android:color/transparent</item> <!-- This does the magic! -->
+    </style>
+
+    <!--<style name="LocalsgramPopMenu" parent="android:Widget.Holo.Light.ListPopupWindow">-->
+        <!--<item name="android:popupBackground">@drawable/option_menu_background</item>-->
+    <!--</style>-->
+
+    <style name="PopupMenu.Actionbar_localsgram" parent="android:Widget.Holo.Light.PopupMenu">
+        <item name="android:popupBackground">@drawable/menu_dropdown_panel_actionbar_localsgram</item>
+    </style>
+
 
 </resources>

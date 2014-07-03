@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="de.s3xy.retrofitsample.app.InstagramActivity" >
+
+    <item android:id="@+id/search_range"
+        android:title="@string/search_range"
+        android:orderInCategory="300"
+        android:showAsAction="never"
+        />
+    <item android:id="@+id/action_nearby"
+        android:title="@string/action_nearby"
+        android:orderInCategory="100"
+        android:showAsAction="never" />
+    <item android:id="@+id/action_popular"
+        android:title="@string/action_popular"
+        android:orderInCategory="200"
+        android:showAsAction="never" />
+</menu>

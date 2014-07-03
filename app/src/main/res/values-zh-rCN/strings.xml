@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Localsgram</string>
+    <string name="action_settings">设定</string>
+        
+    <string name="action_nearby">附近</string>
+    <string name="action_popular">热门</string>
+
+    <string name="lost_position">无法定位你的位置!</string>        
+    <string name="search_range">搜寻范围</string>
+    <string name="select_range">选择范围大小(%1$s公尺)</string>
+    <string name="cancel">取消</string>
+        
+    <string name="gps_network_not_enabled">我们需要你的位置才能找到附近的Instagram©照片。 \n\n请先打开您手机上的定位服务！ </string>
+    <string name="open_location_settings">打开它！ </string>
+    <string name="gentle_notice">Hi there!</string>
+    <string name="seeya">Localsgram通话结束。再见!</string>
+    <string name="retro_error">哇！有东西出错了！请稍后再试。 </string>
+    <string name="around_default_title">在你附近的照片</string>
+    <string name="around">​​在 %1$s</string>
+    <string name="got_num_of_photos">找到 %1$s 张照片!</string>
+    <string name="popular_default_title">Instagram©上的热门照片</string>
+    <string name="no_network">Please turn on your network connection first.</string>
+    <string name="oops">Ooops!</string>
+    <string name="your_location">你附近的照片</string>
+
+</resources>
