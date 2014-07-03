@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Retrofit Sample</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="app_name">Localsgram</string>
     <string name="action_settings">Settings</string>
+
+    <string name="action_nearby">Nearby</string>
+    <string name="action_popular">Popular</string>
+
+    <string name="lost_position">Can\'t locate you!</string>
+    <string name="search_range">Search Range</string>
+    <string name="select_range">Search range: %1$s meters</string>
+    <string name="cancel">Cancel</string>
+    <string name="gps_network_not_enabled">We need your location to show some Instagram© posts around.\n\nPlease turn on location service before using this app.</string>
+    <string name="open_location_settings">Turn it on!</string>
+    <string name="gentle_notice">Hi there!</string>
+    <string name="seeya">Localsgram out. See you!</string>
+    <string name="retro_error">Oops! Something went wrong. \nTry again later.</string>
+    <string name="around_default_title">Around your location</string>
+    <string name="around">Around %1$s</string>
+    <string name="got_num_of_photos">Got %s photos!</string>
+    <string name="popular_default_title">Popular on Instagram©</string>
+    <string name="no_network">Please turn on your network connection first.</string>
+    <string name="oops">Ooops!</string>
+    <string name="your_location">your location</string>
+
 
 </resources>
