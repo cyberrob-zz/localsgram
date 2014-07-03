@@ -43,3 +43,5 @@ proguard/
 *.log.DS_Store
 
 *.keystore
+
+.idea/*
