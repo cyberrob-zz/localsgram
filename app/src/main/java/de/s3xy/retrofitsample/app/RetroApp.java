@@ -23,6 +23,7 @@ public class RetroApp extends Application {
     public static String theAddress = "";
     public static Location cur_location;
 
+    public static boolean IS_WEARABLE_FEATURE_PURCHASED = false;
 
     @Override
     public void onCreate() {

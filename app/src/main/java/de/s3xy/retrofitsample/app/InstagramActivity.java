@@ -51,7 +51,6 @@ public class InstagramActivity extends ActionBarActivity
     /**
      * PARAMS FOR LOCATION UPDATE & ACTIVITY RECOGNITION
      */
-
     public static final int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private static boolean LOCATION_READY = false;
     private LocationClient mLocationClient;
@@ -70,18 +69,18 @@ public class InstagramActivity extends ActionBarActivity
             MILLISECONDS_PER_SECOND * FASTEST_INTERVAL_IN_SECONDS;
 
     private static final long SECONDS_PER_HOUR = 60;
-    private static final long GEOFENCE_EXPIRATION_IN_HOURS = 12;
-    private static final long GEOFENCE_EXPIRATION_TIME =
-            GEOFENCE_EXPIRATION_IN_HOURS *
-                    SECONDS_PER_HOUR *
-                    MILLISECONDS_PER_SECOND;
+//    private static final long GEOFENCE_EXPIRATION_IN_HOURS = 12;
+//    private static final long GEOFENCE_EXPIRATION_TIME =
+//            GEOFENCE_EXPIRATION_IN_HOURS *
+//                    SECONDS_PER_HOUR *
+//                    MILLISECONDS_PER_SECOND;
 
     public static final int DETECTION_INTERVAL_SECONDS = 20;
     public static final int DETECTION_INTERVAL_MILLISECONDS =
             MILLISECONDS_PER_SECOND * DETECTION_INTERVAL_SECONDS;
 
-    private List<Geofence> mGeofenceList;
-    private SimpleGeofenceStore mGeofenceStorage;
+//    private List<Geofence> mGeofenceList;
+//    private SimpleGeofenceStore mGeofenceStorage;
 
     // Global variable to hold the current location
     Location mCurrentLocation;
@@ -91,9 +90,6 @@ public class InstagramActivity extends ActionBarActivity
     boolean mUpdatesRequested;
 
     private IntentFilter filter;
-
-    // Stores the PendingIntent used to request geofence monitoring
-    //private PendingIntent mGeofenceRequestIntent;
 
     /*
      * Store the PendingIntent used to send activity recognition events
@@ -204,58 +200,63 @@ public class InstagramActivity extends ActionBarActivity
 
         isLocationServiceOn();
         mInProgress = false;
-        mActivityRecognitionInProgress = false;
 
-        mActivityRecognitionClient =
-                new ActivityRecognitionClient(getBaseContext(), this, this);
-        startUpdates();
+        if (servicesConnected()) {
+            if (RetroApp.IS_WEARABLE_FEATURE_PURCHASED == Boolean.TRUE) {
 
-         /*
-         * Create the PendingIntent that Location Services uses
-         * to send activity recognition updates back to this app.
-         */
-        Intent intent = new Intent(
-                getBaseContext(), ActivityRecognitionIntentService.class);
-        /*
-         * Return a PendingIntent that starts the IntentService.
-         */
-        mActivityRecognitionPendingIntent =
-                PendingIntent.getService(getBaseContext(), 0, intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT);
+                mActivityRecognitionInProgress = false;
 
-        servicesConnected();
+                mActivityRecognitionClient =
+                        new ActivityRecognitionClient(getBaseContext(), this, this);
+                startUpdates();
 
-        /*
-         * Create a new location client, using the enclosing class to
-         * handle callbacks.
-         */
-        mLocationClient = new LocationClient(this, this, this);
+             /*
+             * Create the PendingIntent that Location Services uses
+             * to send activity recognition updates back to this app.
+             */
+                Intent intent = new Intent(
+                        getBaseContext(), ActivityRecognitionIntentService.class);
+            /*
+             * Return a PendingIntent that starts the IntentService.
+             */
+                mActivityRecognitionPendingIntent =
+                        PendingIntent.getService(getBaseContext(), 0, intent,
+                                PendingIntent.FLAG_UPDATE_CURRENT);
+            }
 
-        // Create the LocationRequest object
-        mLocationRequest = LocationRequest.create();
-        // Use high accuracy
-        mLocationRequest.setPriority(
-                LocationRequest.PRIORITY_LOW_POWER);
-        // Set the update interval to 5 seconds
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        // Set the fastest update interval to 1 second
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
 
-        mUpdatesRequested = true;
+            /*
+             * Create a new location client, using the enclosing class to
+             * handle callbacks.
+             */
+            mLocationClient = new LocationClient(this, this, this);
 
-        filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+            // Create the LocationRequest object
+            mLocationRequest = LocationRequest.create();
+            // Use high accuracy
+            mLocationRequest.setPriority(
+                    LocationRequest.PRIORITY_LOW_POWER);
+            // Set the update interval to 5 seconds
+            mLocationRequest.setInterval(UPDATE_INTERVAL);
+            // Set the fastest update interval to 1 second
+            mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
 
-        setProgressBarIndeterminateVisibility(true);
+            mUpdatesRequested = true;
 
-        if (instagramFrag == null) {
-            instagramFrag = InstagramFragment.newInstance();
-        }
+            filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 
-        if (getFragmentManager().findFragmentById(R.id.container) == null) {
-            getFragmentManager().beginTransaction()
-                    .add(R.id.container, instagramFrag)
-                    .commit();
-        }
+            setProgressBarIndeterminateVisibility(true);
+
+            if (instagramFrag == null) {
+                instagramFrag = InstagramFragment.newInstance();
+            }
+
+            if (getFragmentManager().findFragmentById(R.id.container) == null) {
+                getFragmentManager().beginTransaction()
+                        .add(R.id.container, instagramFrag)
+                        .commit();
+            }
+        } // END of PLAY SERVICE CONNECTED
     }
 
     private boolean servicesConnected() {
@@ -335,12 +336,13 @@ public class InstagramActivity extends ActionBarActivity
         if (!servicesConnected()) {
             return;
         }
-        // If a request is not already underway
+        // If a request is already underway
         if (!mActivityRecognitionInProgress) {
             // Indicate that a request is in progress
             mActivityRecognitionInProgress = true;
             // Request a connection to Location Services
             mActivityRecognitionClient.connect();
+
             //
         } else {
             /*
@@ -352,12 +354,12 @@ public class InstagramActivity extends ActionBarActivity
             mActivityRecognitionInProgress = false;
             mActivityRecognitionClient = null;
 
-            NotificationManager
-                    mNotificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-            mNotificationManager.cancel(001);
         }
+        NotificationManager
+                mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        mNotificationManager.cancel(001);
     }
 
     @Override
@@ -380,12 +382,13 @@ public class InstagramActivity extends ActionBarActivity
         }
         // Disconnecting the client invalidates it.
         mLocationClient.disconnect();
+
+        unregisterReceiver(NetworkChangeReceiver);
         super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(NetworkChangeReceiver);
         super.onDestroy();
     }
 
@@ -397,38 +400,37 @@ public class InstagramActivity extends ActionBarActivity
 
     @Override
     public void onConnected(Bundle bundle) {
-        //Toast.makeText(this, getString(R.string.got_positioned), Toast.LENGTH_SHORT).show();
 
         if (mUpdatesRequested && mLocationClient.isConnected()) {
             mLocationClient.requestLocationUpdates(mLocationRequest, this);
         }
-//        switch (mRequestType) {
-//            case START_ACTIVITY_RECOGNITION:
-//                if (mActivityRecognitionClient.isConnected()) {
-//                    /*
-//                     * Request activity recognition updates using the preset
-//                     * detection interval and PendingIntent. This call is
-//                     * synchronous.
-//                     */
-//                    mActivityRecognitionClient.requestActivityUpdates(
-//                            DETECTION_INTERVAL_MILLISECONDS,
-//                            mActivityRecognitionPendingIntent);
-//                    /*
-//                     * Since the preceding call is synchronous, turn off the
-//                     * in progress flag and disconnect the client
-//                     */
-//                    mActivityRecognitionInProgress = false;
-//                    mActivityRecognitionClient.disconnect();
-//                }
-//                break;
-//            case STOP_ACTIVITY_RECOGNITION:
-//                mActivityRecognitionClient.removeActivityUpdates(
-//                        mActivityRecognitionPendingIntent);
-//                break;
-//            default:
-//                Log.e(TAG, "Unknown request type in onConnected().");
-//                break;
-//        }
+        switch (mRequestType) {
+            case START_ACTIVITY_RECOGNITION:
+                if (mActivityRecognitionClient.isConnected()) {
+                    /*
+                     * Request activity recognition updates using the preset
+                     * detection interval and PendingIntent. This call is
+                     * synchronous.
+                     */
+                    mActivityRecognitionClient.requestActivityUpdates(
+                            DETECTION_INTERVAL_MILLISECONDS,
+                            mActivityRecognitionPendingIntent);
+                    /*
+                     * Since the preceding call is synchronous, turn off the
+                     * in progress flag and disconnect the client
+                     */
+                    mActivityRecognitionInProgress = false;
+                    mActivityRecognitionClient.disconnect();
+                }
+                break;
+            case STOP_ACTIVITY_RECOGNITION:
+                mActivityRecognitionClient.removeActivityUpdates(
+                        mActivityRecognitionPendingIntent);
+                break;
+            default:
+                Log.e(TAG, "Unknown request type in onConnected().");
+                break;
+        }
     }
 
     @Override
@@ -445,8 +447,8 @@ public class InstagramActivity extends ActionBarActivity
         // Destroy the current location client
         mLocationClient = null;
 
-//        mActivityRecognitionInProgress = false;
-//        mActivityRecognitionClient = null;
+        mActivityRecognitionInProgress = false;
+        mActivityRecognitionClient = null;
     }
 
     @Override
@@ -477,9 +479,9 @@ public class InstagramActivity extends ActionBarActivity
 
                     ApiClient.getTheClient(getBaseContext()).getAddress(location);
 
-                    if(InstagramFragment.CMD == InstagramFragment.INSTA_CMD.NEARBY) {
+                    if (InstagramFragment.CMD == InstagramFragment.INSTA_CMD.NEARBY) {
                         instagramFrag.refreshNearbyData();
-                    } else if(InstagramFragment.CMD == InstagramFragment.INSTA_CMD.POPULAR) {
+                    } else if (InstagramFragment.CMD == InstagramFragment.INSTA_CMD.POPULAR) {
                         instagramFrag.refreshPopularData();
                     }
                 }
@@ -494,31 +496,39 @@ public class InstagramActivity extends ActionBarActivity
         mActivityRecognitionInProgress = false;
 
         /*
-         * Google Play services can resolve some errors it detects.
-         * If the error has a resolution, try sending an Intent to
-         * start a Google Play services activity that can resolve
-         * error.
+         * If the error has a resolution, start a Google Play services
+         * activity to resolve it.
          */
         if (connectionResult.hasResolution()) {
             try {
-                // Start an Activity that tries to resolve the error
                 connectionResult.startResolutionForResult(
                         this,
                         CONNECTION_FAILURE_RESOLUTION_REQUEST);
-                /*
-                 * Thrown if Google Play services canceled the original
-                 * PendingIntent
-                 */
             } catch (IntentSender.SendIntentException e) {
                 // Log the error
                 e.printStackTrace();
             }
+            // If no resolution is available, display an error dialog
         } else {
-            /*
-             * If no resolution is available, display a dialog to the
-             * user with the error.
-             */
-            Log.e(TAG, "@ no resolution available: " + connectionResult.getErrorCode());
+            // Get the error code
+            int errorCode = connectionResult.getErrorCode();
+            // Get the error dialog from Google Play services
+            Dialog errorDialog = GooglePlayServicesUtil.getErrorDialog(
+                    errorCode,
+                    this,
+                    CONNECTION_FAILURE_RESOLUTION_REQUEST);
+            // If Google Play services can provide an error dialog
+            if (errorDialog != null) {
+                // Create a new DialogFragment for the error dialog
+                ErrorDialogFragment errorFragment =
+                        new ErrorDialogFragment();
+                // Set the dialog in the DialogFragment
+                errorFragment.setDialog(errorDialog);
+                // Show the error dialog in the DialogFragment
+                errorFragment.show(
+                        getSupportFragmentManager(),
+                        getString(R.string.activity_recognition));
+            }
         }
     }
 
@@ -542,11 +552,11 @@ public class InstagramActivity extends ActionBarActivity
                 Toast.makeText(getBaseContext(), R.string.no_network, Toast.LENGTH_SHORT).show();
                 receive_count = 1;
 
-            } else if(NetworkUtil.getConnectivityStatus(context) == NetworkUtil.TYPE_MOBILE ||
+            } else if (NetworkUtil.getConnectivityStatus(context) == NetworkUtil.TYPE_MOBILE ||
                     NetworkUtil.getConnectivityStatus(context) == NetworkUtil.TYPE_WIFI) {
 
 
-                if(receive_count == 1) {
+                if (receive_count == 1) {
                     if (InstagramFragment.CMD == InstagramFragment.INSTA_CMD.NEARBY) {
                         instagramFrag.refreshNearbyData();
                     } else if (InstagramFragment.CMD == InstagramFragment.INSTA_CMD.POPULAR) {

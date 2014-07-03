@@ -23,6 +23,7 @@
     <string name="no_network">Please turn on your network connection first.</string>
     <string name="oops">Ooops!</string>
     <string name="your_location">your location</string>
+    <string name="activity_recognition">Activity Recognition</string>
 
 
 </resources>

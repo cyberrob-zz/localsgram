@@ -24,5 +24,6 @@
     <string name="no_network">Please turn on your network connection first.</string>
     <string name="oops">Ooops!</string>
     <string name="your_location">你附近的照片</string>
+    <string name="activity_recognition">装置活动侦测</string>
 
 </resources>

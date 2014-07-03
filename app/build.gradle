@@ -31,11 +31,11 @@ android {
 
 //    productFlavors {
 //        demo {
-//            packageName "de.s4xy.retrofitsample.app.demo"
+//            packageName "de.s3xy.retrofitsample.app.demo"
 //            versionName '1.0-demo'
 //        }
 //        full {
-//            packageName "de.s4xy.retrofitsample.app.full"
+//            packageName "de.s3xy.retrofitsample.app.full"
 //            versionName '1.0-full'
 //        }
 //    }
