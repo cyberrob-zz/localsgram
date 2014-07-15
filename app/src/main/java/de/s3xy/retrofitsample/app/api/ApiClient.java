@@ -49,6 +49,7 @@ public class ApiClient {
     private class AddressGetter extends AsyncTask<Location, Void, String> {
 
         Context mContext;
+
         public AddressGetter(Context context) {
             super();
             mContext = context;
@@ -85,38 +86,43 @@ public class ApiClient {
                 return errorString = "";
             }
 
-            // If the reverse geocode returned an address
-            if (addresses != null && addresses.size() > 0) {
-                // Get the first address
-                Address address = addresses.get(0);
+            try {
+
+                // If the reverse geocode returned an address
+                if (addresses != null && addresses.size() > 0) {
+                    // Get the first address
+                    Address address = addresses.get(0);
                 /*
                  * Format the first line of address (if available),
                  * city, and country name.
                  */
-                String addressText = String.format(
-                        "%s, %s, %s",
-                        // If there's a street address, add it
-                        address.getMaxAddressLineIndex() > 0 ?
-                                address.getAddressLine(0) : "",
-                        // Locality is usually a city
-                        address.getLocality().contains("null") ?
-                            "" : address.getLocality(),
-                        // The country of the address
-                        address.getCountryName()
-                );
-                // Return the text
-                return addressText;
-            } else {
-                return "No address found";
+                    String addressText = String.format(
+                            "%s, %s, %s",
+                            // If there's a street address, add it
+                            address.getMaxAddressLineIndex() > 0 ?
+                                    address.getAddressLine(0) : "",
+                            // Locality is usually a city
+                            address.getLocality().contains("null") ?
+                                    "" : address.getLocality(),
+                            // The country of the address
+                            address.getCountryName()
+                    );
+                    // Return the text
+                    return addressText;
+                } else {
+                    return "No address found";
+                }
+            } catch (NullPointerException npe) {
+                return "";
             }
         }
 
         @Override
         protected void onPostExecute(String address) {
 
-            if(address.startsWith(",")) address = address.substring(1);
+            if (address.startsWith(",")) address = address.substring(1);
 
-            if(TextUtils.isEmpty(address) ||
+            if (TextUtils.isEmpty(address) ||
                     address.equalsIgnoreCase("No address found")) {
 
                 address = mContext.getString(R.string.your_location);

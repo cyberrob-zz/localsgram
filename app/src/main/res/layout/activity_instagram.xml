@@ -4,5 +4,5 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="de.s3xy.retrofitsample.app.InstagramActivity"
+    tools:context="de.s3xy.retrofitsample.app.ui.InstagramActivity"
     tools:ignore="MergeRootFrame" />

@@ -1,4 +1,4 @@
-package de.s3xy.retrofitsample.app;
+package de.s3xy.retrofitsample.app.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;

@@ -47,18 +47,18 @@ public class ActivityRecognitionIntentService extends IntentService {
              * Intent.
              */
 
-            int numMessage = 0;
-            int mNotificationId = 001;
-            Notification notification = new Notification.Builder(getBaseContext())
-                    .setContentTitle("I'm " + confidence + "% sure you're ")
-                    .setContentText(activityName)
-                    .setNumber(++numMessage)
-                    .setSmallIcon(android.R.drawable.ic_notification_overlay)
-                    .build();
-            NotificationManager mNotifyMgr =
-                    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-
-            mNotifyMgr.notify(mNotificationId, notification);
+//            int numMessage = 0;
+//            int mNotificationId = 001;
+//            Notification notification = new Notification.Builder(getBaseContext())
+//                    .setContentTitle("I'm " + confidence + "% sure you're ")
+//                    .setContentText(activityName)
+//                    .setNumber(++numMessage)
+//                    .setSmallIcon(android.R.drawable.ic_notification_overlay)
+//                    .build();
+//            NotificationManager mNotifyMgr =
+//                    (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//
+//            mNotifyMgr.notify(mNotificationId, notification);
 
         } else {
             /*

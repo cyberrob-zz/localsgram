@@ -1,4 +1,4 @@
-package de.s3xy.retrofitsample.app;
+package de.s3xy.retrofitsample.app.ui;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,33 +10,36 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
-import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Window;
-import android.widget.TextView;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
-import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 
-import java.util.List;
-
+import de.s3xy.retrofitsample.app.ActivityRecognitionIntentService;
+import de.s3xy.retrofitsample.app.NetworkUtil;
+import de.s3xy.retrofitsample.app.PrefUtil;
+import de.s3xy.retrofitsample.app.R;
+import de.s3xy.retrofitsample.app.RetroApp;
 import de.s3xy.retrofitsample.app.api.ApiClient;
-import de.s3xy.retrofitsample.app.location.SimpleGeofenceStore;
 
 
 public class InstagramActivity extends ActionBarActivity
@@ -119,7 +122,7 @@ public class InstagramActivity extends ActionBarActivity
     }
 
     ;
-    private REQUEST_TYPE mRequestType;
+    private REQUEST_TYPE mRequestType = REQUEST_TYPE.START_ACTIVITY_RECOGNITION;
 
     // Flag that indicates if a request is underway.
     private boolean mInProgress;
@@ -179,19 +182,29 @@ public class InstagramActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         // must be called before setContentView...
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
         setContentView(R.layout.activity_instagram);
 
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            Window window = getWindow();
-//            // Translucent status bar
-//            window.setFlags(
-//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        // Translucent navigation bar
-//            window.setFlags(
-//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-//        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window window = getWindow();
+            // Translucent status bar
+            window.setFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            //Translucent navigation bar
+            window.setFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+
+        // create our manager instance after the content view is set
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        // enable status bar tint
+        tintManager.setStatusBarTintEnabled(true);
+        // enable navigation bar tint
+        tintManager.setNavigationBarTintEnabled(true);
+        tintManager.setTintColor(getResources().getColor(R.color.theme_color));
+        tintManager.setNavigationBarTintColor(getResources().getColor(R.color.theme_color));
 
         getActionBar().setHomeButtonEnabled(false);
         getActionBar().setDisplayShowHomeEnabled(false);
@@ -202,60 +215,64 @@ public class InstagramActivity extends ActionBarActivity
         mInProgress = false;
 
         if (servicesConnected()) {
-            if (RetroApp.IS_WEARABLE_FEATURE_PURCHASED == Boolean.TRUE) {
 
-                mActivityRecognitionInProgress = false;
+            PreferenceManager.setDefaultValues(this, R.xml.default_preferences, false);
 
-                mActivityRecognitionClient =
-                        new ActivityRecognitionClient(getBaseContext(), this, this);
-                startUpdates();
+            //if (RetroApp.IS_WEARABLE_FEATURE_PURCHASED == Boolean.TRUE) {
+
+            mActivityRecognitionInProgress = false;
+
+            mActivityRecognitionClient =
+                    new ActivityRecognitionClient(getBaseContext(), this, this);
+            startUpdates();
 
              /*
              * Create the PendingIntent that Location Services uses
              * to send activity recognition updates back to this app.
              */
-                Intent intent = new Intent(
-                        getBaseContext(), ActivityRecognitionIntentService.class);
+            Intent intent = new Intent(
+                    getBaseContext(), ActivityRecognitionIntentService.class);
             /*
              * Return a PendingIntent that starts the IntentService.
              */
-                mActivityRecognitionPendingIntent =
-                        PendingIntent.getService(getBaseContext(), 0, intent,
-                                PendingIntent.FLAG_UPDATE_CURRENT);
-            }
+            mActivityRecognitionPendingIntent =
+                    PendingIntent.getService(getBaseContext(), 0, intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
 
             /*
              * Create a new location client, using the enclosing class to
              * handle callbacks.
              */
-            mLocationClient = new LocationClient(this, this, this);
+        mLocationClient = new LocationClient(this, this, this);
 
-            // Create the LocationRequest object
-            mLocationRequest = LocationRequest.create();
-            // Use high accuracy
-            mLocationRequest.setPriority(
-                    LocationRequest.PRIORITY_LOW_POWER);
-            // Set the update interval to 5 seconds
-            mLocationRequest.setInterval(UPDATE_INTERVAL);
-            // Set the fastest update interval to 1 second
-            mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        // Create the LocationRequest object
+        mLocationRequest = LocationRequest.create();
+        // Use high accuracy
+        mLocationRequest.setPriority(
+                LocationRequest.PRIORITY_LOW_POWER);
+        // Set the update interval to 5 seconds
+        mLocationRequest.setInterval(UPDATE_INTERVAL);
+        // Set the fastest update interval to 1 second
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
 
-            mUpdatesRequested = true;
+        mUpdatesRequested = true;
 
-            filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        // AKA android.net.conn.CONNECTIVITY_CHANGE
+        filter = new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
 
-            setProgressBarIndeterminateVisibility(true);
+        setProgressBarIndeterminateVisibility(true);
 
-            if (instagramFrag == null) {
-                instagramFrag = InstagramFragment.newInstance();
-            }
+        if (instagramFrag == null) {
+            instagramFrag = InstagramFragment.newInstance();
+        }
 
-            if (getFragmentManager().findFragmentById(R.id.container) == null) {
-                getFragmentManager().beginTransaction()
-                        .add(R.id.container, instagramFrag)
-                        .commit();
-            }
+        if (getFragmentManager().findFragmentById(R.id.container) == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, instagramFrag)
+                    .commit();
+            //}
         } // END of PLAY SERVICE CONNECTED
     }
 

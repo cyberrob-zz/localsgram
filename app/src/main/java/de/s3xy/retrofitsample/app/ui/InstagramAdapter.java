@@ -1,7 +1,6 @@
-package de.s3xy.retrofitsample.app;
+package de.s3xy.retrofitsample.app.ui;
 
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -9,6 +8,7 @@ import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
 
+import de.s3xy.retrofitsample.app.R;
 import de.s3xy.retrofitsample.app.pojo.PopularPhotos;
 
 /**

@@ -4,4 +4,13 @@
 
     <string name="no_network">Please turn on your network connection first.</string>
     <string name="oops">Ooops!</string>
+    <string name="get_notification_while_which_activity">Get new posts notification while</string>
+    <string name="some_activity_type">Walking</string>
+    <string name="wearable_support">Wearable Support</string>
+    <string name="enable_wearable_support">Enable wearable support?</string>
+    <string name="purchase_wearable_support">Purchase wearable support</string>
+    <string name="about">About</string>
+    <string name="prefs_contact_author">Contact Author</string>
+    <string name="pref_leave_msg_with_hashtag_localsgram">Please #localsgram in the message</string>
+    <string name="wearable_support_summary">Get notified on your Android Wearable device!</string>
 </resources>

@@ -12,8 +12,9 @@ import com.google.android.gms.location.DetectedActivity;
  */
 public class PrefUtil {
 
-    private static final String PREF_SEARCH_RANGE = "PREF_SEARCH_RANGE";
-    private static final String PREF_NOTIFIED_IN_ACITIVITY_TYPE = "PREF_NOTIFIED_IN_ACITIVITY_TYPE";
+    public static final String PREF_SEARCH_RANGE = "PREF_SEARCH_RANGE";
+    public static final String PREF_NOTIFIED_IN_ACITIVITY_TYPE = "PREF_NOTIFIED_IN_ACITIVITY_TYPE";
+
     private static final String TAG = PrefUtil.class.getSimpleName();
 
     public static SharedPreferences getDefaultPref(Context context) {

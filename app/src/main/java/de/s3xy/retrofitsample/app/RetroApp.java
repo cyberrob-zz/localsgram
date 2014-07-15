@@ -10,9 +10,15 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.provider.Settings;
 
-/**
- * Created by robertwang on 14/6/9.
- */
+import org.acra.ReportingInteractionMode;
+import org.acra.annotation.ReportsCrashes;
+
+@ReportsCrashes(
+        formKey = "", // This is required for backward compatibility but not used
+        mailTo = "robertwang.tw@gmail.com",
+        mode = ReportingInteractionMode.TOAST,
+        resToastText = R.string.crash_toast_text
+)
 public class RetroApp extends Application {
 
     public static String HOST = "https://api.instagram.com/v1/";

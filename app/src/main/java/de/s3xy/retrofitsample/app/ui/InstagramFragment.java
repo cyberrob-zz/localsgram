@@ -1,10 +1,15 @@
-package de.s3xy.retrofitsample.app;
+package de.s3xy.retrofitsample.app.ui;
 
+import android.animation.Animator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.text.TextUtils;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -18,6 +23,9 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import de.s3xy.retrofitsample.app.NetworkUtil;
+import de.s3xy.retrofitsample.app.R;
+import de.s3xy.retrofitsample.app.RetroApp;
 import de.s3xy.retrofitsample.app.api.ApiClient;
 import de.s3xy.retrofitsample.app.api.InstagramClient;
 import de.s3xy.retrofitsample.app.pojo.PopularPhotos;
@@ -58,6 +66,9 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
      * Views.
      */
     private InstagramAdapter mAdapter;
+
+    // See if attached then we can SAFELY manipulate activity
+    private boolean ACTIVITY_CREATED = false;
 
     public enum INSTA_CMD {
         NEARBY, POPULAR
@@ -119,6 +130,13 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
                 refreshPopularData();
 
                 break;
+
+            case R.id.action_settings:
+
+                Intent go_settings = new Intent(getActivity(), SettingsActivity.class);
+                startActivity(go_settings);
+                getActivity().overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                break;
         }
 
         return true;
@@ -135,110 +153,119 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
 
     void refreshPopularData() {
 
-        CMD = INSTA_CMD.POPULAR;
-        photos = null;
-        mAdapter.notifyDataSetInvalidated();
+        if (ACTIVITY_CREATED == Boolean.TRUE) {
+            CMD = INSTA_CMD.POPULAR;
+            photos = null;
+            mAdapter.notifyDataSetInvalidated();
 
-        getActivity().setProgressBarIndeterminateVisibility(true);
 
-        ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.popular_default_title));
+            ((ActionBarActivity) getActivity()).setProgressBarIndeterminateVisibility(true);
 
-        InstagramClient.getInstagramApiInterface()
-                .getPopularPhotos(RetroApp.instagram_client_id,
-                        new Callback<PopularPhotos>() {
-                            @Override
-                            public void success(PopularPhotos popularPhotos, Response response) {
-                                getActivity().setProgressBarIndeterminateVisibility(false);
-                                Log.d(TAG, "@ API response: " + response.getStatus());
-                                Log.d(TAG, "@ Photo count: " + popularPhotos.getData().size());
+            ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.popular_default_title));
 
-                                photos = popularPhotos;
+            InstagramClient.getInstagramApiInterface()
+                    .getPopularPhotos(RetroApp.instagram_client_id,
+                            new Callback<PopularPhotos>() {
+                                @Override
+                                public void success(PopularPhotos popularPhotos, Response response) {
+                                    getActivity().setProgressBarIndeterminateVisibility(false);
+                                    Log.d(TAG, "@ API response: " + response.getStatus());
+                                    Log.d(TAG, "@ Photo count: " + popularPhotos.getData().size());
 
-                                mAdapter.setPhotos(popularPhotos);
-                                mAdapter.notifyDataSetInvalidated();
+                                    photos = popularPhotos;
+
+                                    mAdapter.setPhotos(popularPhotos);
+                                    mAdapter.notifyDataSetInvalidated();
+                                }
+
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    getActivity().setProgressBarIndeterminateVisibility(false);
+                                    Log.e(TAG, error.getMessage());
+                                }
                             }
-
-                            @Override
-                            public void failure(RetrofitError error) {
-                                getActivity().setProgressBarIndeterminateVisibility(false);
-                                Log.e(TAG, error.getMessage());
-                            }
-                        }
-                );
+                    );
+        } else {
+            Log.d(TAG, " NOT refreshing the content...");
+        }
     }
 
     void refreshNearbyData() {
 
-        photos = null;
-        CMD = INSTA_CMD.NEARBY;
-        if (mAdapter == null) mAdapter = new InstagramAdapter(getActivity());
-        mAdapter.notifyDataSetInvalidated();
+        if (ACTIVITY_CREATED == Boolean.TRUE) {
+            photos = null;
+            CMD = INSTA_CMD.NEARBY;
+            if (mAdapter == null) mAdapter = new InstagramAdapter(getActivity());
+            mAdapter.notifyDataSetInvalidated();
 
-        try {
-            if (TextUtils.isEmpty(RetroApp.theAddress)) {
-                ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around_default_title));
-            } else {
-                ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
+            try {
+                if (TextUtils.isEmpty(RetroApp.theAddress)) {
+                    ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around_default_title));
+                } else {
+                    ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
+                }
+            } catch (java.lang.NullPointerException npe) {
+
             }
-        } catch (java.lang.NullPointerException npe) {
 
-        }
+            // protect ourselves from NPE
+            if (TextUtils.isEmpty(RetroApp.cur_lat) || TextUtils.isEmpty(RetroApp.cur_lng)) {
+                return;
+            }
 
-        // protect ourselves from NPE
-        if (TextUtils.isEmpty(RetroApp.cur_lat) || TextUtils.isEmpty(RetroApp.cur_lng)) {
-            return;
-        }
+            ((ActionBarActivity) getActivity()).setProgressBarIndeterminateVisibility(true);
 
-        getActivity().setProgressBarIndeterminateVisibility(true);
+            InstagramClient.getInstagramApiInterface()
+                    .searchMedia(
+                            RetroApp.instagram_client_id,
+                            RetroApp.cur_lat,
+                            RetroApp.cur_lng,
+                            RetroApp.search_range,
+                            new Callback<PopularPhotos>() {
+                                @Override
+                                public void success(PopularPhotos nearbyPhotos, Response response) {
 
-        InstagramClient.getInstagramApiInterface()
-                .searchMedia(
-                        RetroApp.instagram_client_id,
-                        RetroApp.cur_lat,
-                        RetroApp.cur_lng,
-                        RetroApp.search_range,
-                        new Callback<PopularPhotos>() {
-                            @Override
-                            public void success(PopularPhotos nearbyPhotos, Response response) {
+                                    getActivity().setProgressBarIndeterminateVisibility(false);
 
-                                getActivity().setProgressBarIndeterminateVisibility(false);
+                                    Log.d(TAG, "@ API response: " + response.getStatus());
+                                    Log.d(TAG, "@ Photo count: " + nearbyPhotos.getData().size());
 
-                                Log.d(TAG, "@ API response: " + response.getStatus());
-                                Log.d(TAG, "@ Photo count: " + nearbyPhotos.getData().size());
-
-                                if (nearbyPhotos == null) {
-                                    setEmptyText(getString(R.string.retro_error));
-                                } else {
-                                    Toast.
-                                            makeText(
-                                                    getActivity(),
-                                                    getString(R.string.got_num_of_photos, nearbyPhotos.getData().size()),
-                                                    Toast.LENGTH_SHORT)
-                                            .show();
-
-                                    ApiClient.getTheClient(getActivity()).getAddress(RetroApp.cur_location);
-
-                                    if (TextUtils.isEmpty(RetroApp.theAddress)) {
-                                        ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around_default_title));
+                                    if (nearbyPhotos == null) {
+                                        setEmptyText(getString(R.string.retro_error));
                                     } else {
-                                        ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
+                                        Toast.
+                                                makeText(
+                                                        getActivity(),
+                                                        getString(R.string.got_num_of_photos, nearbyPhotos.getData().size()),
+                                                        Toast.LENGTH_SHORT)
+                                                .show();
+
+                                        ApiClient.getTheClient(getActivity()).getAddress(RetroApp.cur_location);
+
+                                        if (TextUtils.isEmpty(RetroApp.theAddress)) {
+                                            ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around_default_title));
+                                        } else {
+                                            ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
+                                        }
                                     }
+
+                                    photos = nearbyPhotos;
+
+                                    mAdapter.setPhotos(nearbyPhotos);
+                                    mAdapter.notifyDataSetInvalidated();
                                 }
 
-                                photos = nearbyPhotos;
-
-                                mAdapter.setPhotos(nearbyPhotos);
-                                mAdapter.notifyDataSetInvalidated();
+                                @Override
+                                public void failure(RetrofitError error) {
+                                    getActivity().setProgressBarIndeterminateVisibility(false);
+                                    setEmptyText(getString(R.string.retro_error));
+                                    Log.e(TAG, error.toString());
+                                }
                             }
-
-                            @Override
-                            public void failure(RetrofitError error) {
-                                getActivity().setProgressBarIndeterminateVisibility(false);
-                                setEmptyText(getString(R.string.retro_error));
-                                Log.e(TAG, error.toString());
-                            }
-                        }
-                );
+                    );
+        } else {
+            Log.d(TAG, " NOT refreshing the content...");
+        }
     }
 
     @Override
@@ -262,16 +289,6 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
 
         } else {
 
-//            if (mAdapter.getCount() == 0) {
-//                if (CMD == INSTA_CMD.NEARBY) {
-//                    if (!TextUtils.isEmpty(RetroApp.cur_lat) &&
-//                            !TextUtils.isEmpty(RetroApp.cur_lng)) {
-//                        refreshNearbyData();
-//                    }
-//                } else if (CMD == INSTA_CMD.POPULAR)
-//                    refreshPopularData();
-//            }
-
             getActivity().setProgressBarIndeterminateVisibility(false);
 
             if (CMD == INSTA_CMD.NEARBY) {
@@ -280,8 +297,10 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
                 } else {
                     ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
                 }
+                refreshNearbyData();
             } else if (CMD == INSTA_CMD.POPULAR) {
                 ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.popular_default_title));
+                refreshPopularData();
             }
         }
     }
@@ -324,8 +343,90 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
     }
 
     @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, "@ onViewCreated()");
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "@ onActivityCreated()");
+        setRetainInstance(true);
+        ACTIVITY_CREATED = !ACTIVITY_CREATED;
+    }
+
+    @TargetApi(17)
+    @Override
+    public void onViewStateRestored(Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d(TAG, "@ onViewStateRestored()::TargetApi(17)");
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Log.d(TAG, "@ onConfigurationChanged()");
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        Log.d(TAG, "@ onLowMemory()");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(TAG, "@ onStop()");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "@ onPause()");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(TAG, "@ onResume()");
+    }
+
+    @Override
+    public void onInflate(Activity activity, AttributeSet attrs, Bundle savedInstanceState) {
+        super.onInflate(activity, attrs, savedInstanceState);
+        Log.d(TAG, "@ onInflate()");
+    }
+
+    @Override
+    public Animator onCreateAnimator(int transit, boolean enter, int nextAnim) {
+        Log.d(TAG, "@ onCreateAnimator()");
+        return super.onCreateAnimator(transit, enter, nextAnim);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(TAG, "@ onDestroyView()");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG, "@ onDestroy()");
+    }
+
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        Log.d(TAG, "@ onTrimMemory()");
+    }
+
+    @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+
         try {
             mListener = (OnFragmentInteractionListener) activity;
         } catch (ClassCastException e) {

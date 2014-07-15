@@ -10,6 +10,8 @@
         <item name="android:actionBarStyle">@style/LocalsgramActionBar</item>
         <item name="android:popupMenuStyle">@style/PopupMenu.Actionbar_localsgram</item>
         <item name="android:actionDropDownStyle">@style/PopupMenu.Actionbar_localsgram</item>
+        <item name="android:fitsSystemWindows">true</item>
+        <item name="android:clipToPadding">true</item>
     </style>
 
     <style name="LocalsgramActionBar" parent="@android:style/Widget.Holo.Light.ActionBar.Solid.Inverse">

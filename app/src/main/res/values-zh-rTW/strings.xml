@@ -20,10 +20,21 @@
     <string name="around">在 %1$s</string>
     <string name="got_num_of_photos">找到 %1$s 張照片!</string>
     <string name="popular_default_title">Instagram©上的熱門照片</string>
-    <string name="no_network">Please turn on your network connection first.</string>
-    <string name="oops">Ooops!</string>
+    <string name="no_network">請先啟用您裝置上的網路存取.</string>
+    <string name="oops">糟糕!</string>
     <string name="your_location">你附近的照片</string>
     <string name="activity_recognition">裝置活動偵測</string>
-
-
+    <string name="crash_toast_text">請送出當機報告幫助我們改善錯誤</string>
+    <string name="get_notification_while_which_activity">告訴我附近的新照片當</string>
+    <string name="some_activity_type">步行</string>
+    <string name="wearable_support">穿戴式裝置支援</string>
+    <string name="enable_wearable_support">啟用穿戴式裝置支援?</string>
+    <string name="purchase_wearable_support">購買穿戴式裝置支援</string>
+    <string name="about">關於</string>
+    <string name="prefs_contact_author">聯絡作者</string>
+    <string name="pref_leave_msg_with_hashtag_localsgram">请加上 #localsgram 在留言中</string>
+    <string name="go_purchase">敗下去!</string>
+    <string name="maybe_next_time">下次再說</string>
+    <string name="wearable_support_msg">想要在Android穿戴式装置上收到通知吗？ \n\n购买后您便可以在Android穿戴式装置上收到附近照片的通知。 \n\n当然，购买后您也可以随时暂时关闭这项通知。</string>
+    <string name="wearable_support_summary">在Android穿戴式装置上收到通知！</string>
 </resources>

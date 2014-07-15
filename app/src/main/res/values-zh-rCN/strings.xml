@@ -25,5 +25,18 @@
     <string name="oops">Ooops!</string>
     <string name="your_location">你附近的照片</string>
     <string name="activity_recognition">装置活动侦测</string>
+    <string name="crash_toast_text">Please send out crash report to us</string>
+    <string name="get_notification_while_which_activity">Get new posts notification while</string>
+    <string name="some_activity_type">Walking</string>
+    <string name="wearable_support">穿戴式装置支援</string>
+    <string name="enable_wearable_support">启用穿戴式装置支援?</string>
+    <string name="purchase_wearable_support">购买穿戴式装置支援</string>
+    <string name="about">关于</string>
+    <string name="prefs_contact_author">联络作者</string>
+    <string name="pref_leave_msg_with_hashtag_localsgram">Please #localsgram in the message</string>
+    <string name="go_purchase">买了!</string>
+    <string name="maybe_next_time">下次再说</string>
+    <string name="wearable_support_msg">想要在Android穿戴式裝置上收到通知嗎？\n\n購買後您便可以在Android穿戴式裝置上收到附近照片的通知。\n\n当然，购买后您也可以随时暂时关闭这项通知。</string>
+    <string name="wearable_support_summary">在Android穿戴式裝置上收到通知！</string>
 
 </resources>
