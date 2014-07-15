@@ -37,4 +37,6 @@
     <string name="maybe_next_time">Next time</string>
     <string name="wearable_support_msg">Want to get notified on your Android wearable? \n\nPurchase the support and it will show nearby photos depending actual activity you prefer. \n\nAfter purchasing you can still disable it if you like.</string>
     <string name="wearable_support_summary">Get notified on your Android Wearable device!</string>
+    <string name="github_repo">Open source @ github</string>
+    <string name="checkout_github_repo_for_more">Checkout the repo for more info</string>
 </resources>

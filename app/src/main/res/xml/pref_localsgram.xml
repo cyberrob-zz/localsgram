@@ -1,42 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory android:title="@string/wearable_support">
+        <de.s3xy.retrofitsample.app.ui.PurchasePreference
+            android:dialogMessage="@string/wearable_support_msg"
+            android:dialogTitle="@string/purchase_wearable_support"
+            android:key="pref_wearable_purchase"
+            android:negativeButtonText="@string/maybe_next_time"
+            android:positiveButtonText="@string/go_purchase"
+            android:summary="@string/wearable_support_summary"
+            android:title="@string/purchase_wearable_support" />
 
-    <de.s3xy.retrofitsample.app.ui.PurchasePreference
-        android:dialogTitle="@string/purchase_wearable_support"
-        android:dialogMessage="@string/wearable_support_msg"
-        android:key="pref_wearable_purchase"
-        android:negativeButtonText="@string/maybe_next_time"
-        android:positiveButtonText="@string/go_purchase"
-        android:summary="@string/wearable_support_summary"
-        android:title="@string/purchase_wearable_support" />
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:enabled="false"
+            android:key="pref_wearable_support"
+            android:summary="@string/purchase_wearable_support"
+            android:title="@string/enable_wearable_support" />
 
-    <CheckBoxPreference
-        android:defaultValue="false"
-        android:key="pref_wearable_support"
-        android:summary="@string/purchase_wearable_support"
-        android:title="@string/enable_wearable_support"
-        android:enabled="false"
-        />
+        <ListPreference
+            android:defaultValue="1"
+            android:enabled="false"
+            android:entries="@array/pref_notify_activity_type_list_titles"
+            android:entryValues="@array/pref_notify_activity_type_list_values"
+            android:key="notify_activity_type"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:summary="@string/some_activity_type"
+            android:title="@string/get_notification_while_which_activity" />
 
-    <ListPreference
-        android:defaultValue="1"
-        android:entries="@array/pref_notify_activity_type_list_titles"
-        android:entryValues="@array/pref_notify_activity_type_list_values"
-        android:key="notify_activity_type"
-        android:negativeButtonText="@null"
-        android:positiveButtonText="@null"
-        android:summary="@string/some_activity_type"
-        android:title="@string/get_notification_while_which_activity"
-        android:enabled="false"/>
+    </PreferenceCategory>
 
-
-    <Preference
-        android:summary="@string/pref_leave_msg_with_hashtag_localsgram"
-        android:title="@string/prefs_contact_author">
-        <intent
-            android:action="android.intent.action.VIEW"
-            android:data="https://twitter.com/Cyberrob" />
-    </Preference>
+    <PreferenceCategory android:title="@string/about">
+        <Preference
+            android:summary="@string/pref_leave_msg_with_hashtag_localsgram"
+            android:title="@string/prefs_contact_author">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://twitter.com/Cyberrob" />
+        </Preference>
+        <Preference
+            android:summary="@string/checkout_github_repo_for_more"
+            android:title="@string/github_repo">
+            <intent
+                android:action="android.intent.action.VIEW"
+                android:data="https://github.com/cyberrob/localsgram" />
+        </Preference>
+    </PreferenceCategory>
 
 </PreferenceScreen>

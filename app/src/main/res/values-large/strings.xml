@@ -11,4 +11,6 @@
     <string name="prefs_contact_author">Contact Author</string>
     <string name="pref_leave_msg_with_hashtag_localsgram">Please #localsgram in the message</string>
     <string name="wearable_support_summary">Get notified on your Android Wearable device!</string>
+    <string name="github_repo">Open source @ github</string>
+    <string name="checkout_github_repo_for_more">Checkout the repo for more info</string>
 </resources>

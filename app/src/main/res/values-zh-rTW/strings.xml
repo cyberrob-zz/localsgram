@@ -37,4 +37,6 @@
     <string name="maybe_next_time">下次再說</string>
     <string name="wearable_support_msg">想要在Android穿戴式装置上收到通知吗？ \n\n购买后您便可以在Android穿戴式装置上收到附近照片的通知。 \n\n当然，购买后您也可以随时暂时关闭这项通知。</string>
     <string name="wearable_support_summary">在Android穿戴式装置上收到通知！</string>
+    <string name="github_repo">Open source @ github</string>
+    <string name="checkout_github_repo_for_more">Checkout the repo for more info</string>
 </resources>
