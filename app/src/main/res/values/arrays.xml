@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string-array name="pref_notify_activity_type_list_titles">
-        <item>Walking/On Foot</item>
         <item>On Transit</item>
-        <item>Stay Still</item>
+        <item>On Bicycle</item>
+        <item>On Foot</item>
     </string-array>
     <string-array name="pref_notify_activity_type_list_values">
+        <item>0</item>
         <item>1</item>
         <item>2</item>
-        <item>3</item>
     </string-array>
 </resources>

@@ -6,11 +6,18 @@
     <string name="some_activity_type">Walking</string>
     <string name="wearable_support">Wearable Support</string>
     <string name="enable_wearable_support">Enable wearable support?</string>
-    <string name="purchase_wearable_support">Purchase wearable support</string>
+    <string name="wearable_notification_on">On</string>
+    <string name="wearable_notification_off">Off</string>
     <string name="about">About</string>
     <string name="prefs_contact_author">Contact Author</string>
     <string name="pref_leave_msg_with_hashtag_localsgram">Please #localsgram in the message</string>
     <string name="wearable_support_summary">Get notified on your Android Wearable device!</string>
     <string name="github_repo">Open source @ github</string>
     <string name="checkout_github_repo_for_more">Checkout the repo for more info</string>
+    <string name="interested_in_looking_around">Interested in looking around?</string>
+    <string name="notification">Notification</string>
+    <string name="receive_notification">Receive nearby notification</string>
+    <string name="notification_on">On</string>
+    <string name="notification_off">Off</string>
+    <string name="purchase_wearable_support">Purchase Android wearable support</string>
 </resources>

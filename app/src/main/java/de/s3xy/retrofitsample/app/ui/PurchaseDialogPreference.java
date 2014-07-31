@@ -4,19 +4,15 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.preference.DialogPreference;
-import android.preference.Preference;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.View;
-
-import de.s3xy.retrofitsample.app.R;
 
 /**
  * Created by robertwang on 7/15/14.
  */
-public class PurchasePreference extends DialogPreference {
+public class PurchaseDialogPreference extends DialogPreference {
 
-    private static final String TAG = PurchasePreference.class.getSimpleName();
+    private static final String TAG = PurchaseDialogPreference.class.getSimpleName();
 
     public interface PurchaseDecisionListener {
         public void onUserWantToBuy();
@@ -26,7 +22,8 @@ public class PurchasePreference extends DialogPreference {
 
     PurchaseDecisionListener decisionListener;
 
-    public PurchasePreference(Context context, AttributeSet attrs) {
+
+    public PurchaseDialogPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 

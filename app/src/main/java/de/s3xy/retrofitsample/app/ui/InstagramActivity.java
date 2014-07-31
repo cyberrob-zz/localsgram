@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.IntentSender;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
@@ -19,7 +20,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.TypefaceSpan;
 import android.util.Log;
 import android.view.Window;
 import android.view.WindowManager;
@@ -47,7 +52,8 @@ public class InstagramActivity extends ActionBarActivity
         InstagramFragment.OnFragmentInteractionListener,
         GooglePlayServicesClient.ConnectionCallbacks,
         GooglePlayServicesClient.OnConnectionFailedListener,
-        LocationListener, RangeFragment.OnRangeFragmentInteractionListener {
+        LocationListener, RangeFragment.OnRangeFragmentInteractionListener,
+        ApiClient.ApiRequestListener {
 
     private static final String TAG = InstagramActivity.class.getSimpleName();
 
@@ -101,6 +107,7 @@ public class InstagramActivity extends ActionBarActivity
     private PendingIntent mActivityRecognitionPendingIntent;
     // Store the current activity recognition client
     private ActivityRecognitionClient mActivityRecognitionClient;
+    private boolean NOTIFICATION_ON;
 
     @Override
     public void onRangeChanged(int range) {
@@ -112,6 +119,18 @@ public class InstagramActivity extends ActionBarActivity
         PrefUtil.saveSearchPref(getBaseContext(), final_range);
         Log.d(TAG, "range dialog dismissed.");
         instagramFrag.refreshNearbyData();
+    }
+
+    @Override
+    public void onApiWorking() {
+        Log.d(TAG, "on api working...");
+        setProgressBarIndeterminateVisibility(true);
+    }
+
+    @Override
+    public void onApiDone() {
+        Log.d(TAG, "on api done.");
+        setProgressBarIndeterminateVisibility(false);
     }
 
     // Defines the allowable request types.
@@ -177,6 +196,13 @@ public class InstagramActivity extends ActionBarActivity
         }
     }
 
+    public SpannableString getSpannableString(String content) {
+        SpannableString s = new SpannableString(content);
+        s.setSpan(new de.s3xy.retrofitsample.app.ui.font.TypefaceSpan(this, "Roboto 100.otf"), 0, s.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return s;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -185,31 +211,13 @@ public class InstagramActivity extends ActionBarActivity
 
         setContentView(R.layout.activity_instagram);
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            Window window = getWindow();
-            // Translucent status bar
-            window.setFlags(
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            //Translucent navigation bar
-            window.setFlags(
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
-        }
-
-        // create our manager instance after the content view is set
-        SystemBarTintManager tintManager = new SystemBarTintManager(this);
-        // enable status bar tint
-        tintManager.setStatusBarTintEnabled(true);
-        // enable navigation bar tint
-        tintManager.setNavigationBarTintEnabled(true);
-        tintManager.setTintColor(getResources().getColor(R.color.theme_color));
-        tintManager.setNavigationBarTintColor(getResources().getColor(R.color.theme_color));
+        setupStatusAndNotifiactionBar();
 
         getActionBar().setHomeButtonEnabled(false);
         getActionBar().setDisplayShowHomeEnabled(false);
-
-        // LOCATION & ACTIVITY
+        //Customize the actionbar title
+        SpannableString title = getSpannableString(getString(R.string.app_name));
+        getActionBar().setTitle(title);
 
         isLocationServiceOn();
         mInProgress = false;
@@ -220,31 +228,22 @@ public class InstagramActivity extends ActionBarActivity
 
             //if (RetroApp.IS_WEARABLE_FEATURE_PURCHASED == Boolean.TRUE) {
 
-            mActivityRecognitionInProgress = false;
+            if (NOTIFICATION_ON =
+                    PreferenceManager
+                            .getDefaultSharedPreferences(this)
+                            .getBoolean("pref_notification", true) == Boolean.TRUE) {
 
-            mActivityRecognitionClient =
-                    new ActivityRecognitionClient(getBaseContext(), this, this);
-            startUpdates();
-
-             /*
-             * Create the PendingIntent that Location Services uses
-             * to send activity recognition updates back to this app.
-             */
-            Intent intent = new Intent(
-                    getBaseContext(), ActivityRecognitionIntentService.class);
-            /*
-             * Return a PendingIntent that starts the IntentService.
-             */
-            mActivityRecognitionPendingIntent =
-                    PendingIntent.getService(getBaseContext(), 0, intent,
-                            PendingIntent.FLAG_UPDATE_CURRENT);
+                if (mActivityRecognitionClient == null)
+                    initActivityDetector();
+            }
         }
 
 
-            /*
-             * Create a new location client, using the enclosing class to
-             * handle callbacks.
-             */
+
+        /*
+         * Create a new location client, using the enclosing class to
+         * handle callbacks.
+         */
         mLocationClient = new LocationClient(this, this, this);
 
         // Create the LocationRequest object
@@ -276,6 +275,50 @@ public class InstagramActivity extends ActionBarActivity
         } // END of PLAY SERVICE CONNECTED
     }
 
+    private void initActivityDetector() {
+        mActivityRecognitionInProgress = false;
+
+        mActivityRecognitionClient =
+                new ActivityRecognitionClient(getBaseContext(), this, this);
+        startUpdates();
+
+                /*
+                 * Create the PendingIntent that Location Services uses
+                 * to send activity recognition updates back to this app.
+                 */
+        Intent intent = new Intent(
+                getBaseContext(), ActivityRecognitionIntentService.class);
+                /*
+                 * Return a PendingIntent that starts the IntentService.
+                 */
+        mActivityRecognitionPendingIntent =
+                PendingIntent.getService(getBaseContext(), 0, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT);
+    }
+
+    private void setupStatusAndNotifiactionBar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Window window = getWindow();
+            // Translucent status bar
+            window.setFlags(
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
+                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            //Translucent navigation bar
+//            window.setFlags(
+//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION,
+//                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+        }
+
+        // create our manager instance after the content view is set
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        // enable status bar tint
+        tintManager.setStatusBarTintEnabled(true);
+        // enable navigation bar tint
+        //tintManager.setNavigationBarTintEnabled(true);
+        tintManager.setTintColor(getResources().getColor(R.color.theme_color));
+        //tintManager.setNavigationBarTintColor(getResources().getColor(R.color.theme_color));
+    }
+
     private boolean servicesConnected() {
         // Check that Google Play services is available
         int resultCode =
@@ -284,8 +327,8 @@ public class InstagramActivity extends ActionBarActivity
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
             // In debug mode, log the status
-            Log.d("Location Updates",
-                    "Google Play services is available.");
+//            Log.d("Location Updates",
+//                    "Google Play services is available.");
             // Continue
             return true;
             // Google Play services was not available for some reason
@@ -328,6 +371,7 @@ public class InstagramActivity extends ActionBarActivity
             mActivityRecognitionInProgress = true;
             // Request a connection to Location Services
             mActivityRecognitionClient.connect();
+            Log.d(TAG, "Activity detector turn ON!");
             //
         } else {
             /*
@@ -343,6 +387,7 @@ public class InstagramActivity extends ActionBarActivity
      * Turn off activity recognition updates
      */
     public void stopUpdates() {
+        if (mActivityRecognitionClient == null) return;
         // Set the request type to STOP
         mRequestType = REQUEST_TYPE.STOP_ACTIVITY_RECOGNITION;
         /*
@@ -354,7 +399,7 @@ public class InstagramActivity extends ActionBarActivity
             return;
         }
         // If a request is already underway
-        if (!mActivityRecognitionInProgress) {
+        if (!mActivityRecognitionInProgress && NOTIFICATION_ON == Boolean.TRUE) {
             // Indicate that a request is in progress
             mActivityRecognitionInProgress = true;
             // Request a connection to Location Services
@@ -370,7 +415,7 @@ public class InstagramActivity extends ActionBarActivity
              */
             mActivityRecognitionInProgress = false;
             mActivityRecognitionClient = null;
-
+            Log.d(TAG, "Activity detector turn OFF!");
         }
         NotificationManager
                 mNotificationManager =
@@ -405,6 +450,11 @@ public class InstagramActivity extends ActionBarActivity
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
     }
@@ -422,27 +472,34 @@ public class InstagramActivity extends ActionBarActivity
             mLocationClient.requestLocationUpdates(mLocationRequest, this);
         }
         switch (mRequestType) {
+
             case START_ACTIVITY_RECOGNITION:
-                if (mActivityRecognitionClient.isConnected()) {
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_notification", true) ==
+                        Boolean.TRUE) {
+                    if (mActivityRecognitionClient.isConnected()) {
                     /*
                      * Request activity recognition updates using the preset
                      * detection interval and PendingIntent. This call is
                      * synchronous.
                      */
-                    mActivityRecognitionClient.requestActivityUpdates(
-                            DETECTION_INTERVAL_MILLISECONDS,
-                            mActivityRecognitionPendingIntent);
+                        mActivityRecognitionClient.requestActivityUpdates(
+                                DETECTION_INTERVAL_MILLISECONDS,
+                                mActivityRecognitionPendingIntent);
                     /*
                      * Since the preceding call is synchronous, turn off the
                      * in progress flag and disconnect the client
                      */
-                    mActivityRecognitionInProgress = false;
-                    mActivityRecognitionClient.disconnect();
+                        mActivityRecognitionInProgress = false;
+                        mActivityRecognitionClient.disconnect();
+                    }
                 }
                 break;
             case STOP_ACTIVITY_RECOGNITION:
-                mActivityRecognitionClient.removeActivityUpdates(
-                        mActivityRecognitionPendingIntent);
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean("pref_notification", true) ==
+                        Boolean.TRUE) {
+                    mActivityRecognitionClient.removeActivityUpdates(
+                            mActivityRecognitionPendingIntent);
+                }
                 break;
             default:
                 Log.e(TAG, "Unknown request type in onConnected().");
@@ -485,6 +542,8 @@ public class InstagramActivity extends ActionBarActivity
         RetroApp.cur_lat = Double.toString(location.getLatitude());
         RetroApp.cur_lng = Double.toString(location.getLongitude());
 
+        PrefUtil.saveLastKnownLat(getBaseContext(), RetroApp.cur_lat);
+        PrefUtil.saveLastKnownLng(getBaseContext(), RetroApp.cur_lng);
 
         if (LOCATION_READY == false) {
             if (!TextUtils.isEmpty(RetroApp.cur_lat) &&
@@ -494,7 +553,8 @@ public class InstagramActivity extends ActionBarActivity
                 if (NetworkUtil.getConnectivityStatus(getBaseContext())
                         != NetworkUtil.TYPE_NOT_CONNECTED) {
 
-                    ApiClient.getTheClient(getBaseContext()).getAddress(location);
+                    if (TextUtils.isEmpty(RetroApp.theAddress))
+                        ApiClient.getTheClient(this).getAddress(location);
 
                     if (InstagramFragment.CMD == InstagramFragment.INSTA_CMD.NEARBY) {
                         instagramFrag.refreshNearbyData();

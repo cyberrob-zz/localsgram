@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="theme_color">#785448</color>
+    <color name="theme_color">#82533e</color>
+    <color name="theme_light_color">#9e654b</color>
+    <color name="actionbar_title_color">#d8d8d8</color>
+    <color name="error_color">#FF4838</color>
 </resources>

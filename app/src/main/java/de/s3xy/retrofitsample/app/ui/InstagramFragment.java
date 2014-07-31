@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -23,7 +25,10 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.w3c.dom.Text;
+
 import de.s3xy.retrofitsample.app.NetworkUtil;
+import de.s3xy.retrofitsample.app.PrefUtil;
 import de.s3xy.retrofitsample.app.R;
 import de.s3xy.retrofitsample.app.RetroApp;
 import de.s3xy.retrofitsample.app.api.ApiClient;
@@ -43,7 +48,8 @@ import retrofit.client.Response;
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
  * interface.
  */
-public class InstagramFragment extends Fragment implements AbsListView.OnItemClickListener {
+public class InstagramFragment extends Fragment
+        implements AbsListView.OnItemClickListener, ApiClient.ApiRequestListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -69,6 +75,18 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
 
     // See if attached then we can SAFELY manipulate activity
     private boolean ACTIVITY_CREATED = false;
+
+    @Override
+    public void onApiWorking() {
+        Log.d(TAG, "on api working...");
+        ((ActionBarActivity) getActivity()).setProgressBarIndeterminateVisibility(true);
+    }
+
+    @Override
+    public void onApiDone() {
+        Log.d(TAG, "on api done.");
+        ((ActionBarActivity) getActivity()).setProgressBarIndeterminateVisibility(false);
+    }
 
     public enum INSTA_CMD {
         NEARBY, POPULAR
@@ -151,6 +169,13 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
             menu.findItem(R.id.search_range).setEnabled(false);
     }
 
+    public SpannableString getSpannableString(String content) {
+        SpannableString s = new SpannableString(content);
+        s.setSpan(new de.s3xy.retrofitsample.app.ui.font.TypefaceSpan(getActivity(), "Roboto 100.otf"), 0, s.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return s;
+    }
+
     void refreshPopularData() {
 
         if (ACTIVITY_CREATED == Boolean.TRUE) {
@@ -158,10 +183,11 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
             photos = null;
             mAdapter.notifyDataSetInvalidated();
 
-
             ((ActionBarActivity) getActivity()).setProgressBarIndeterminateVisibility(true);
 
-            ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.popular_default_title));
+            ((ActionBarActivity) getActivity())
+                    .getSupportActionBar()
+                    .setTitle(getSpannableString(getString(R.string.popular_default_title)));
 
             InstagramClient.getInstagramApiInterface()
                     .getPopularPhotos(RetroApp.instagram_client_id,
@@ -181,6 +207,7 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
                                 @Override
                                 public void failure(RetrofitError error) {
                                     getActivity().setProgressBarIndeterminateVisibility(false);
+                                    setEmptyText(getString(R.string.retro_error));
                                     Log.e(TAG, error.getMessage());
                                 }
                             }
@@ -200,9 +227,13 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
 
             try {
                 if (TextUtils.isEmpty(RetroApp.theAddress)) {
-                    ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around_default_title));
+                    ((ActionBarActivity) getActivity())
+                            .getSupportActionBar()
+                            .setTitle(getSpannableString(getString(R.string.around_default_title)));
                 } else {
-                    ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
+                    ((ActionBarActivity) getActivity())
+                            .getSupportActionBar()
+                            .setTitle(getSpannableString(getString(R.string.around, RetroApp.theAddress)));
                 }
             } catch (java.lang.NullPointerException npe) {
 
@@ -210,7 +241,12 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
 
             // protect ourselves from NPE
             if (TextUtils.isEmpty(RetroApp.cur_lat) || TextUtils.isEmpty(RetroApp.cur_lng)) {
-                return;
+                // Fall back to pref to check if any location left
+                if (TextUtils.isEmpty(PrefUtil.getLastKnownLat(getActivity())) ||
+                        TextUtils.isEmpty(PrefUtil.getLastKnownLng(getActivity()))) {
+                    setEmptyText(getString(R.string.lost_position));
+                    return;
+                }
             }
 
             ((ActionBarActivity) getActivity()).setProgressBarIndeterminateVisibility(true);
@@ -233,25 +269,30 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
                                     if (nearbyPhotos == null) {
                                         setEmptyText(getString(R.string.retro_error));
                                     } else {
-                                        Toast.
-                                                makeText(
-                                                        getActivity(),
-                                                        getString(R.string.got_num_of_photos, nearbyPhotos.getData().size()),
-                                                        Toast.LENGTH_SHORT)
-                                                .show();
+//                                        Toast.
+//                                                makeText(
+//                                                        getActivity(),
+//                                                        getString(R.string.got_num_of_photos, nearbyPhotos.getData().size()),
+//                                                        Toast.LENGTH_SHORT)
+//                                                .show();
 
-                                        ApiClient.getTheClient(getActivity()).getAddress(RetroApp.cur_location);
+                                        if (TextUtils.isEmpty(RetroApp.theAddress))
+                                            ApiClient.getTheClient(getActivity()).getAddress(RetroApp.cur_location);
 
                                         if (TextUtils.isEmpty(RetroApp.theAddress)) {
-                                            ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around_default_title));
+                                            ((ActionBarActivity) getActivity())
+                                                    .getSupportActionBar()
+                                                    .setTitle(getSpannableString(getString(R.string.around_default_title)));
                                         } else {
-                                            ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
+                                            ((ActionBarActivity) getActivity())
+                                                    .getSupportActionBar()
+                                                    .setTitle(getSpannableString(getString(R.string.around, RetroApp.theAddress)));
                                         }
+                                        photos = nearbyPhotos;
+                                        mAdapter.setPhotos(nearbyPhotos);
+                                        RetroApp.CACHED_PHOTOS = nearbyPhotos;
                                     }
 
-                                    photos = nearbyPhotos;
-
-                                    mAdapter.setPhotos(nearbyPhotos);
                                     mAdapter.notifyDataSetInvalidated();
                                 }
 
@@ -284,7 +325,6 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
         if (NetworkUtil.getConnectivityStatus(getActivity()) == NetworkUtil.TYPE_NOT_CONNECTED) {
 
             getActivity().setProgressBarIndeterminateVisibility(false);
-            //getActivity().getActionBar().setTitle(getString(R.string.oops));
             setEmptyText(getText(R.string.no_network));
 
         } else {
@@ -293,13 +333,19 @@ public class InstagramFragment extends Fragment implements AbsListView.OnItemCli
 
             if (CMD == INSTA_CMD.NEARBY) {
                 if (TextUtils.isEmpty(RetroApp.theAddress)) {
-                    ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around_default_title));
+                    ((ActionBarActivity) getActivity())
+                            .getSupportActionBar()
+                            .setTitle(getSpannableString(getString(R.string.around_default_title)));
                 } else {
-                    ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.around, RetroApp.theAddress));
+                    ((ActionBarActivity) getActivity())
+                            .getSupportActionBar()
+                            .setTitle(getSpannableString(getString(R.string.around, RetroApp.theAddress)));
                 }
                 refreshNearbyData();
             } else if (CMD == INSTA_CMD.POPULAR) {
-                ((ActionBarActivity) getActivity()).getSupportActionBar().setTitle(getString(R.string.popular_default_title));
+                ((ActionBarActivity) getActivity())
+                        .getSupportActionBar()
+                        .setTitle(getSpannableString(getString(R.string.popular_default_title)));
                 refreshPopularData();
             }
         }

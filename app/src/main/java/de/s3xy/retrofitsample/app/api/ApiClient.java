@@ -25,6 +25,13 @@ public class ApiClient {
     private static Context mContext;
     private String mAddress;
 
+    public interface ApiRequestListener {
+        public void onApiWorking();
+        public void onApiDone();
+    }
+
+    private static ApiRequestListener apiRequestListener;
+
     private ApiClient(Context context) {
         mContext = context;
     }
@@ -35,14 +42,18 @@ public class ApiClient {
             theClient = new ApiClient(context);
         }
 
+        apiRequestListener = (ApiRequestListener)context;
+
         return theClient;
     }
 
-    public String getAddress(Location location) {
+    public void getAddress(Location location) {
+
+        apiRequestListener.onApiWorking();
 
         new AddressGetter(mContext).execute(location);
 
-        return mAddress == null ? "No address" : mAddress;
+        //return mAddress == null ? mContext.getString(R.string.around_default_title) : mAddress;
     }
 
 
@@ -57,6 +68,7 @@ public class ApiClient {
 
         @Override
         protected String doInBackground(Location... locations) {
+
             Geocoder geocoder =
                     new Geocoder(mContext, Locale.getDefault());
             // Get the current location from the input parameter list
@@ -97,10 +109,10 @@ public class ApiClient {
                  * city, and country name.
                  */
                     String addressText = String.format(
-                            "%s, %s, %s",
+                            "%s, %s",
                             // If there's a street address, add it
-                            address.getMaxAddressLineIndex() > 0 ?
-                                    address.getAddressLine(0) : "",
+//                            address.getMaxAddressLineIndex() > 0 ?
+//                                    address.getAddressLine(0) : "",
                             // Locality is usually a city
                             address.getLocality().contains("null") ?
                                     "" : address.getLocality(),
@@ -119,6 +131,8 @@ public class ApiClient {
 
         @Override
         protected void onPostExecute(String address) {
+
+            apiRequestListener.onApiDone();
 
             if (address.startsWith(",")) address = address.substring(1);
 

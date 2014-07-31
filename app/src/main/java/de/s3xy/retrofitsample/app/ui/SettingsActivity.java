@@ -10,18 +10,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
-import android.preference.DialogPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.RingtonePreference;
-import android.support.v4.app.TaskStackBuilder;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MenuItem;
-import android.support.v4.app.NavUtils;
 import android.view.Window;
 import android.view.WindowManager;
 
@@ -42,7 +41,8 @@ import java.util.List;
  * href="http://developer.android.com/guide/topics/ui/settings.html">Settings
  * API Guide</a> for more information on developing a Settings UI.
  */
-public class SettingsActivity extends PreferenceActivity implements PurchasePreference.PurchaseDecisionListener {
+public class SettingsActivity extends PreferenceActivity
+        implements PurchaseDialogPreference.PurchaseDecisionListener {
     /**
      * Determines whether to always show the simplified settings UI, where
      * settings are presented in a single list. When false, settings are shown
@@ -50,6 +50,7 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
      * shown on tablets.
      */
     private static final boolean ALWAYS_SIMPLE_PREFS = false;
+    private static final String TAG = SettingsActivity.class.getSimpleName();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,10 +73,17 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
         // enable status bar tint
         tintManager.setStatusBarTintEnabled(true);
         // enable navigation bar tint
-        tintManager.setNavigationBarTintEnabled(true);
+        //tintManager.setNavigationBarTintEnabled(true);
         tintManager.setTintColor(getResources().getColor(R.color.theme_color));
-        tintManager.setNavigationBarTintColor(getResources().getColor(R.color.theme_color));
+        //tintManager.setNavigationBarTintColor(getResources().getColor(R.color.theme_color));
         setupActionBar();
+    }
+
+    public SpannableString getSpannableString(String content) {
+        SpannableString s = new SpannableString(content);
+        s.setSpan(new de.s3xy.retrofitsample.app.ui.font.TypefaceSpan(this, "Roboto 100.otf"), 0, s.length(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return s;
     }
 
     /**
@@ -87,6 +95,14 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
             // Show the Up button in the action bar.
             getActionBar().setDisplayHomeAsUpEnabled(true);
         }
+        getActionBar().setTitle(getSpannableString(getString(R.string.action_settings)));
+    }
+
+    @Override
+    protected void onStop() {
+
+        // TODO send or broadcast the intent of telling main activity to turn on/off the detector
+        super.onStop();
     }
 
     @Override
@@ -138,51 +154,19 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
             return;
         }
 
-        // In the simplified UI, fragments are not used at all and we instead
-        // use the older PreferenceActivity APIs.
-
-        // Add 'general' preferences.
+        // Add 'localsgram' preferences.
         addPreferencesFromResource(R.xml.pref_localsgram);
 
-
-        // Add 'notifications' preferences, and a corresponding header.
-
-        //PreferenceCategory fakeHeader = new PreferenceCategory(this);
-
-//        fakeHeader.setTitle(R.string.pref_header_notifications);
-//        getPreferenceScreen().addPreference(fakeHeader);
-//        addPreferencesFromResource(R.xml.pref_notification);
-
-        // Add 'data and sync' preferences, and a corresponding header.
-//        fakeHeader = new PreferenceCategory(this);
-//        fakeHeader.setTitle(R.string.pref_header_data_sync);
-//        getPreferenceScreen().addPreference(fakeHeader);
-//        addPreferencesFromResource(R.xml.pref_data_sync);
-
-        // Add 'localsgram' preferences.
-        //fakeHeader = new PreferenceCategory(this);
-//        fakeHeader.setTitle(R.string.wearable_support);
-//        getPreferenceScreen().addPreference(fakeHeader);
-//        addPreferencesFromResource(R.xml.pref_localsgram);
-
-        // Bind the summaries of EditText/List/Dialog/Ringtone preferences to
-        // their values. When their values change, their summaries are updated
-        // to reflect the new value, per the Android Design guidelines.
-//        bindPreferenceSummaryToValue(findPreference("example_text"));
-//        bindPreferenceSummaryToValue(findPreference("example_list"));
-//        bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-//        bindPreferenceSummaryToValue(findPreference("sync_frequency"));
-
-        final Preference wearableNotifyType = findPreference("notify_activity_type");
-
-        bindPreferenceSummaryToValue(wearableNotifyType);
-
-        PurchasePreference purchaseWearablePref =
-                (PurchasePreference) findPreference("pref_wearable_purchase");
+        PurchaseDialogPreference purchaseWearablePref =
+                (PurchaseDialogPreference) findPreference("pref_wearable_purchase");
 
         purchaseWearablePref.setupListener(SettingsActivity.this);
-//
-//        bindPreferenceSummaryToValue(purchaseWearablePref);
+
+        // 2 checkbox preference
+        bindPreferenceSummaryToValue(findPreference("pref_wearable_switch"));
+        bindPreferenceSummaryToValue(findPreference("pref_notification"));
+
+        bindPreferenceSummaryToValue(findPreference("notify_activity_type"));
     }
 
     /**
@@ -222,7 +206,7 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void onBuildHeaders(List<Header> target) {
         if (!isSimplePreferences(this)) {
-            loadHeadersFromResource(R.xml.pref_headers, target);
+            loadHeadersFromResource(R.xml.pref_localsgram, target);
         }
     }
 
@@ -230,10 +214,32 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.
      */
-    private static Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener = new Preference.OnPreferenceChangeListener() {
+    private Preference.OnPreferenceChangeListener sBindPreferenceSummaryToValueListener
+            = new Preference.OnPreferenceChangeListener() {
         @Override
         public boolean onPreferenceChange(Preference preference, Object value) {
-            String stringValue = value.toString();
+
+            String stringValue = "";
+            if (preference.getKey().equalsIgnoreCase("pref_notification")) {
+
+                stringValue =
+                        (((Boolean) value) == Boolean.TRUE) ?
+                                preference.getContext().getString(R.string.notification_on) :
+                                preference.getContext().getString(R.string.notification_off);
+
+                Log.d(TAG, "wearable support is " + String.valueOf((Boolean) value));
+                findPreference("notify_activity_type").setEnabled((Boolean) value);
+
+            } else if (preference.getKey().equalsIgnoreCase("pref_wearable_switch")) {
+
+                stringValue =
+                        (((Boolean) value) == Boolean.TRUE) ?
+                                preference.getContext().getString(R.string.wearable_notification_on) :
+                                preference.getContext().getString(R.string.wearable_notification_off);
+
+            } else {
+                stringValue = value.toString();
+            }
 
             if (preference instanceof ListPreference) {
                 // For list preferences, look up the correct display value in
@@ -248,29 +254,8 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
                                 : null
                 );
 
-            } else if (preference instanceof RingtonePreference) {
-                // For ringtone preferences, look up the correct display value
-                // using RingtoneManager.
-                if (TextUtils.isEmpty(stringValue)) {
-                    // Empty values correspond to 'silent' (no ringtone).
-                    preference.setSummary(R.string.pref_ringtone_silent);
-
-                } else {
-                    Ringtone ringtone = RingtoneManager.getRingtone(
-                            preference.getContext(), Uri.parse(stringValue));
-
-                    if (ringtone == null) {
-                        // Clear the summary if there was a lookup error.
-                        preference.setSummary(null);
-                    } else {
-                        // Set the summary to reflect the new ringtone display
-                        // name.
-                        String name = ringtone.getTitle(preference.getContext());
-                        preference.setSummary(name);
-                    }
-                }
-
             } else {
+
                 // For all other preferences, set the summary to the value's
                 // simple string representation.
                 preference.setSummary(stringValue);
@@ -288,86 +273,48 @@ public class SettingsActivity extends PreferenceActivity implements PurchasePref
      *
      * @see #sBindPreferenceSummaryToValueListener
      */
-    private static void bindPreferenceSummaryToValue(Preference preference) {
+    private void bindPreferenceSummaryToValue(Preference preference) {
         // Set the listener to watch for value changes.
         preference.setOnPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
         // Trigger the listener immediately with the preference's
         // current value.
-        sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
-                PreferenceManager
-                        .getDefaultSharedPreferences(preference.getContext())
-                        .getString(preference.getKey(), "")
-        );
+
+        if (preference.getKey().equalsIgnoreCase("pref_notification")) {
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getBoolean("pref_notification", true)
+            );
+        } else if (preference.getKey().equalsIgnoreCase("pref_wearable_switch")) {
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getBoolean("pref_wearable_switch", true)
+            );
+        } else {
+
+            sBindPreferenceSummaryToValueListener.onPreferenceChange(preference,
+                    PreferenceManager
+                            .getDefaultSharedPreferences(preference.getContext())
+                            .getString(preference.getKey(), "")
+            );
+        }
     }
+
 
     @Override
     public void onUserWantToBuy() {
-        findPreference("pref_wearable_support").setEnabled(true);
-        findPreference("notify_activity_type").setEnabled(true);
+        findPreference("pref_wearable_switch").setEnabled(true);
+        ((CheckBoxPreference) findPreference("pref_wearable_switch")).setChecked(true);
+        findPreference("pref_wearable_switch").setSummary(getString(R.string.wearable_notification_on));
     }
 
     @Override
     public void onMaybeNextTime() {
-        findPreference("pref_wearable_support").setEnabled(false);
-        findPreference("notify_activity_type").setEnabled(false);
+        findPreference("pref_wearable_switch").setEnabled(false);
+        ((CheckBoxPreference) findPreference("pref_wearable_switch")).setChecked(false);
+        findPreference("pref_wearable_switch").setSummary(getString(R.string.wearable_notification_off));
     }
 
-    /**
-     * This fragment shows general preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_general);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("example_text"));
-            bindPreferenceSummaryToValue(findPreference("example_list"));
-        }
-    }
-
-    /**
-     * This fragment shows notification preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class NotificationPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_notification);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("notifications_new_message_ringtone"));
-        }
-    }
-
-    /**
-     * This fragment shows data and sync preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class DataSyncPreferenceFragment extends PreferenceFragment {
-        @Override
-        public void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_data_sync);
-
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            bindPreferenceSummaryToValue(findPreference("sync_frequency"));
-        }
-    }
 }

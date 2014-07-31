@@ -5,7 +5,7 @@
     <string name="action_settings">Settings</string>
     <string name="action_nearby">Nearby</string>
     <string name="action_popular">Popular</string>
-    <string name="lost_position">Can\'t locate you!</string>
+    <string name="lost_position">We Can\'t locate you!\n\nPlease turn on location service on the device.</string>
     <string name="search_range">Search Range</string>
     <string name="select_range">Search range: %1$s meters</string>
     <string name="cancel">Cancel</string>
@@ -13,7 +13,7 @@
     <string name="open_location_settings">Turn it on!</string>
     <string name="gentle_notice">Hi there!</string>
     <string name="seeya">Localsgram out. See you!</string>
-    <string name="retro_error">Oops! Something went wrong. \nTry again later.</string>
+    <string name="retro_error">Oops! \nSomething went wrong. \nTry again later.</string>
     <string name="around_default_title">Around your location</string>
     <string name="around">Around %1$s</string>
     <string name="got_num_of_photos">Got %s photos!</string>
@@ -24,19 +24,26 @@
     <string name="activity_recognition">Activity Recognition</string>
     <string name="crash_toast_text">Please send out crash report to us</string>
     <string name="get_notification_while_which_activity">Get new posts notification while</string>
-    <string name="some_activity_type">Walking</string>
+    <string name="some_activity_type">On Foot</string>
     <string name="wearable_support">Wearable Support</string>
     <string name="enable_wearable_support">Enable wearable support?</string>
-    <string name="purchase_wearable_support">Purchase wearable support</string>
+    <string name="wearable_notification_on">On</string>
+    <string name="wearable_notification_off">Off</string>
     <string name="about">About</string>
     <string name="prefs_contact_author">Contact Author</string>
     <string name="pref_leave_msg_with_hashtag_localsgram">Please #localsgram in the message</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_settings_i">SettingsIActivity</string>
+
+    <string name="title_activity_settings">Settings</string>
     <string name="go_purchase">Go purchase!</string>
     <string name="maybe_next_time">Next time</string>
     <string name="wearable_support_msg">Want to get notified on your Android wearable? \n\nPurchase the support and it will show nearby photos depending actual activity you prefer. \n\nAfter purchasing you can still disable it if you like.</string>
     <string name="wearable_support_summary">Get notified on your Android Wearable device!</string>
-    <string name="github_repo">Open source @ github</string>
+    <string name="github_repo">Localsgram is on Github</string>
     <string name="checkout_github_repo_for_more">Checkout the repo for more info</string>
+    <string name="interested_in_looking_around">Interested in looking around?</string>
+    <string name="notification">Notification</string>
+    <string name="receive_notification">Receive nearby notification</string>
+    <string name="notification_on">On</string>
+    <string name="notification_off">Off</string>
+    <string name="purchase_wearable_support">Purchase Android wearable support</string>
 </resources>

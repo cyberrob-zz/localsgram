@@ -15,16 +15,29 @@ public class PrefUtil {
     public static final String PREF_SEARCH_RANGE = "PREF_SEARCH_RANGE";
     public static final String PREF_NOTIFIED_IN_ACITIVITY_TYPE = "PREF_NOTIFIED_IN_ACITIVITY_TYPE";
 
+    public static final String PREF_LAST_KNOWN_LAT = "PREF_LAST_KNOWN_LAT";
+    public static final String PREF_LAST_KNOWN_LNG = "PREF_LAST_KNOWN_LNG";
+
     private static final String TAG = PrefUtil.class.getSimpleName();
 
     public static SharedPreferences getDefaultPref(Context context) {
         return PreferenceManager.getDefaultSharedPreferences(context);
     }
 
-    public static int getPreferNotifiedInActivityType(Context context) {
-        return
-                getDefaultPref(context).
-                        getInt(PREF_NOTIFIED_IN_ACITIVITY_TYPE, DetectedActivity.ON_FOOT);
+    public static void saveLastKnownLat(Context context, String lastLat) {
+        getDefaultPref(context).edit().putString(PREF_LAST_KNOWN_LAT, lastLat).commit();
+    }
+
+    public static void saveLastKnownLng(Context context, String lastLng) {
+        getDefaultPref(context).edit().putString(PREF_LAST_KNOWN_LNG, lastLng).commit();
+    }
+
+    public static String getLastKnownLat(Context context) {
+        return getDefaultPref(context).getString(PREF_LAST_KNOWN_LAT, "");
+    }
+
+    public static String getLastKnownLng(Context context) {
+        return getDefaultPref(context).getString(PREF_LAST_KNOWN_LNG, "");
     }
 
     public static void savePrefNotifiedInActivityType(Context context, int type) {
